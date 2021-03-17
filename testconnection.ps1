@@ -1,3 +1,10 @@
+<#
+CSV file format
+
+IP;Port;Ping
+serverip;80;yes
+
+#>
 
 param (
     [Parameter(Mandatory=$false)] [switch] $ntp,
@@ -90,10 +97,3 @@ $checkList | Export-Csv -Path $exportPath -NoTypeInformation -Delimiter ";" -Err
 #>
 
 
-<#
-CSV file format
-
-Server;Port;Open
-servername;80;
-
-#>
