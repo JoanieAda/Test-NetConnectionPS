@@ -1,46 +1,60 @@
 
 param (
-    [Parameter(Mandatory=$false)] [switch] $ntp
+    [Parameter(Mandatory=$false)] [switch] $ntp,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateScript({ 
+        Test-Path $_ -PathType Leaf 
+    })]
+    [string] $path   
 );
 
+
+<# Static variables for testing
 $IP = '192.168.1.10'
 $Port = '80'
 $Ping = 'yes'
+#>
 
 
+$serverlist=Import-Csv -Path $path -Delimiter ";" -ErrorAction Stop
 
-if ($Ping -eq 'yes'){         
-    if (Test-NetConnection $IP -InformationLevel Quiet -ErrorAction Stop){
+$serverlist| ForEach-Object {
+    try{
+        if ($_.Ping -eq 'yes'){         
+            if (Test-NetConnection $_.IP -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
 
-        write-host -ForegroundColor Green "$IP ping successful"
+                write-host -ForegroundColor Green $_.IP"ping successful"
+
+        }
+            else{
+
+                write-host -ForegroundColor Red $_.IP"ping failed"
+
+            }
+        }
+        else{            
+        }
+
+        if ($_.Port -gt '0'){
+            if (Test-NetConnection $_.IP -Port $_.Port -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
+
+                write-host -ForegroundColor Green $_.IP"TCP connection to port"$_.Port"established"
+
+            }
+            else{
+
+                write-host -ForegroundColor Red $_.IP"TCP connection to port"$_.Port"failed"
+
+            }
+        }
+        else{
+        }
 
     }
-    else{
-
-        write-host -ForegroundColor Red "$IP ping failed"
-
+    catch{
     }
 }
-else{            
-}
-
-
-
-if ($Port -gt '0'){
-    if (Test-NetConnection $IP -Port $Port -InformationLevel Quiet -ErrorAction Stop){
-
-        write-host -ForegroundColor Green "$IP TCP connection to port $Port established"
-
-    }
-    else{
-
-        write-host -ForegroundColor Red "$IP TCP connection to port $Port failed"
-
-    }
-}
-else{
-}
-
 
 
 if ($ntp){
@@ -63,45 +77,7 @@ else{
 }
 
 
-
-
 <#
-[CmdletBinding()]
-Param(
-  
-  [Parameter(Mandatory=$True,Position=1)]
-
-    [ValidateScript({
-        
-        Test-Path $_ -PathType Leaf
-
-    })]
-
-   [string]
-   $Path
-)
-
-
-$checkList=Import-Csv -Path $Path -Delimiter ";" -ErrorAction Stop
-
-$checkList| ForEach-Object {
-
-    try{
-        
-        if (Test-NetConnection -ComputerName $_.Server -Port $_.Port -InformationLevel Quiet -ErrorAction Stop){
-            
-            $_.Open=$true
-        
-        }else{
-            
-            $_.Open=$false
-        
-        }
-    
-    }catch{
-        #Nothing we can do because the -ErrorAction is ignored 
-    }
-}
 
 
 $outputObject=Get-Item $Path
