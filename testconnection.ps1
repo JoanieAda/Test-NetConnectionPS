@@ -137,35 +137,6 @@ if ($ntp){
 else{
 }
 
-<#  Old NTP validation that relied on NTP config of the host
-if ($ntp){
-
-    $ntpstate = w32tm /query /peers | select-string "state:"
-    $ntppeer = w32tm /query /peers | select-string "peer: (.*),.*" | foreach {$_.matches.groups[1].value}
-
-    if ($ntpstate -like '*Active'){
-
-        $string = ('NTP Server ' + $ntppeer + ' active')
-        $stringcolor = 'Green'
-
-    }
-    else{
-
-        $string = ('NTP Server ' + $ntppeer + ' not conencted')
-        $stringcolor = 'Red'
-
-    }
-
-    write-host -ForegroundColor $stringcolor $string
-    if ($report){
-        write-output $string | Out-File -Append $exportpath
-    }
-
-}
-else{
-}
-#>
-
 
 #Add new line at the end of the report
 if ($report){
