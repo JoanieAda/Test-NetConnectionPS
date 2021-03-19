@@ -31,6 +31,12 @@ param (
 );
 
 
+#Manually set variables
+#List of ntpservers to poll when the -ntp switch is set
+$ntpservers = @('132.246.11.238','132.146.11.227','132.246.11.229')
+
+
+
 #Generates report path and inserts a leading date line
 if ($report){
 
@@ -102,8 +108,6 @@ $serverlist| ForEach-Object {
 
 #Check NTP #reachability to list of NTP servers
 if ($ntp){
-
-    $ntpservers = @('132.246.11.238','132.146.11.227','132.246.11.229')
 
     $ntpservers| ForEach-Object {
         try{
