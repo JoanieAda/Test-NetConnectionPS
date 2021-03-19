@@ -33,7 +33,7 @@ param (
 
 #Manually set variables
 #List of ntpservers to poll when the -ntp switch is set
-$ntpservers = @('132.246.11.238','132.146.11.227','132.246.11.229')
+$ntpservers = @('132.246.11.238','132.246.11.227','192.168.1.11')
 
 
 
