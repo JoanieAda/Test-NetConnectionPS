@@ -18,10 +18,8 @@ IP can also be an fqdn as long as the host can perform proper name resolution
 #>
 
 param (
-    [Parameter(Mandatory=$false)] 
-    [switch] $ntp,
-    [Parameter(Mandatory=$false)] 
-    [switch] $report,
+    [Parameter(Mandatory=$false)] [switch] $ntp,
+    [Parameter(Mandatory=$false)] [switch] $report,
 
     [Parameter(Mandatory=$true)]
     [ValidateScript({ 
@@ -33,16 +31,16 @@ param (
 
 #Manually set variables
 #List of ntpservers to poll when the -ntp switch is set
-$ntpservers = @('132.246.11.238','132.246.11.227','192.168.1.11')
+$ntpServers = @('132.246.11.238','132.246.11.227','192.168.1.11')
 
 
 
 #Generates report path and inserts a leading date line
 if ($report){
 
-    $originalpath = Get-Item $path
-    $exportpath = Join-Path -Path $originalpath.DirectoryName -ChildPath $("Report_"+ $originalpath.BaseName + "_" + (Get-Date).tostring("yyyy-MM-dd") + ".log") 
-    write-output ('------------' + (Get-Date) + '------------') | Out-File -Append $exportpath
+    $originalPath = Get-Item $path
+    $exportPath = Join-Path -Path $originalPath.DirectoryName -ChildPath $('Report_connection-test_'+ $originalPath.BaseName + '_' + (Get-Date).tostring('yyyy-MM-dd') + '.log') 
+    write-output ('------------' + (Get-Date) + '------------') | Out-File -Append $exportPath
 
 }
 else{
@@ -50,27 +48,27 @@ else{
 
 
 #Check the reachability/TCP connection for the hosts in the CSV
-$serverlist=Import-Csv -Path $path -Delimiter ";" -ErrorAction Stop
+$serverList=Import-Csv -Path $path -Delimiter ";" -ErrorAction Stop
 
-$serverlist| ForEach-Object {
+$serverList| ForEach-Object {
     try{
         if ($_.Ping -eq 'yes'){         
             if (Test-NetConnection $_.IP -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
 
                 $string = ($_.IP + ' ping successful')
-                $stringcolor = 'Green'
+                $stringColor = 'Green'
 
             }
             else{
 
                 $string = ($_.IP + ' ping failed')
-                $stringcolor = 'Red'
+                $stringColor = 'Red'
 
             }
 
-            write-host -ForegroundColor $stringcolor $string
+            write-host -ForegroundColor $stringColor $string
             if ($report){
-                write-output $string | Out-File -Append $exportpath
+                write-output $string | Out-File -Append $exportPath
             }
 
         }
@@ -81,19 +79,19 @@ $serverlist| ForEach-Object {
             if (Test-NetConnection $_.IP -Port $_.Port -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
 
                 $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' established')
-                $stringcolor = 'Green'
+                $stringColor = 'Green'
 
             }
             else{
 
                 $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' failed')
-                $stringcolor = 'Red'
+                $stringColor = 'Red'
 
             }
 
-            write-host -ForegroundColor $stringcolor $string
+            write-host -ForegroundColor $stringColor $string
             if ($report){
-                write-output $string | Out-File -Append $exportpath
+                write-output $string | Out-File -Append $exportPath
             }
 
         }
@@ -109,27 +107,27 @@ $serverlist| ForEach-Object {
 #Check NTP #reachability to list of NTP servers
 if ($ntp){
 
-    $ntpservers| ForEach-Object {
+    $ntpServers| ForEach-Object {
         try{
 
-            $ntpstate = w32tm /stripchart /computer:$_ /samples:1 | select -Index 3  
+            $ntpState = w32tm /stripchart /computer:$_ /samples:1 | select -Index 3  
 
-            if ($ntpstate -like '[0-9][0-9]:[0-9][0-9]:[0-9][0-9], d:*'){
+            if ($ntpState -like '[0-9][0-9]:[0-9][0-9]:[0-9][0-9], d:*'){
                
                 $string = ('NTP Server ' + $_ + ' active')
-                $stringcolor = 'Green'
+                $stringColor = 'Green'
 
             }
             else{
 
                 $string = ('NTP Server ' + $_ + ' failed')
-                $stringcolor = 'Red'
+                $stringColor = 'Red'
 
             }
 
-            write-host -ForegroundColor $stringcolor $string
+            write-host -ForegroundColor $stringColor $string
             if ($report){
-                write-output $string | Out-File -Append $exportpath
+                write-output $string | Out-File -Append $exportPath
             }
 
         }
@@ -144,5 +142,5 @@ else{
 
 #Add new line at the end of the report
 if ($report){
-    write-output `n | Out-File -Append $exportpath
+    write-output `n | Out-File -Append $exportPath
 }
