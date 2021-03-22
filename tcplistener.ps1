@@ -1,5 +1,5 @@
 <# 
-listenconnnection.ps1 -port <port num> [-report] [-timeout <idle timeout in minutes>]
+tcplistener.ps1 -port <port num> [-report] [-timeout <idle timeout in minutes>]
 
 This script was built to perform some validation tests based on an csv host list.
 -port is a mandatory value

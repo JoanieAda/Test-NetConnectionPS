@@ -1,5 +1,6 @@
 # Test-NetConnectionPS
-PS script to perform some Test-NetConnection and NTP validation
+testconnection.ps1 PS script to perform some Test-NetConnection and NTP validation
+tcplistener.ps1 PS script to listen to defined TCP port
 
 First PS script so might not be optimal, not sure yet if future improvements will be made.
 
