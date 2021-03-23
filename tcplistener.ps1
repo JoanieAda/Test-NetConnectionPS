@@ -70,7 +70,7 @@ while($stopWatch.elapsed -lt $idleTimeout){
         write-host -ForegroundColor Yellow -NoNewLine 'Wait for additional connections? (y/n): '
         $answer = read-host
 
-        while (!$answer -OR ($answer -ine 'y' -AND $answer -ine 'yes' -AND $answer -ine 'n' -AND $answer -ine 'no')){
+        while (!$answer -OR ($answer -ne 'y' -AND $answer -ne 'yes' -AND $answer -ne 'n' -AND $answer -ne 'no')){
 
             write-host -ForegroundColor Yellow -NoNewLine 'Answer must be y/Y or n/N: '
             $answer = read-host
