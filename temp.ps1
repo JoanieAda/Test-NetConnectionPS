@@ -2,7 +2,7 @@ $result = [System.Collections.ArrayList]::new()
 
 $Port = 30500
 $Timeout = 1000
-$remoteHostname = '192.168.1.65'
+$remoteHostname = '192.168.1.35'
 
 $tcpClient = New-Object System.Net.Sockets.TcpClient
 #$portOpened = $tcpClient.ConnectAsync($remoteHostname, $Port).Wait($Timeout)
@@ -49,8 +49,8 @@ $tcpClient = New-Object System.Net.Sockets.TcpClient
 #finally {
 #    $tcpClient.Close()
 #}
-
-                $tcpConn=$tcpClient.BeginConnect($remoteHostname, $Port, $NULL, $NULL)
+                $tcpClient = New-Object System.Net.Sockets.TcpClient
+                $tcpConn = $tcpClient.BeginConnect($remoteHostname, $Port, $NULL, $NULL)
                 if ($tcpConn.AsyncWaitHandle.WaitOne($Timeout, $False)){
     
                     $string = ($remoteHostname + ' TCP connection to port ' + $Port + ' established')
@@ -63,5 +63,6 @@ $tcpClient = New-Object System.Net.Sockets.TcpClient
                     $stringColor = 'Red'
     
                 }
-
+                $tcpClient.EndConnect($tcpConn) | Out-Null
+                $tcpClient.Close()
                 write-host -ForegroundColor $stringColor $string  

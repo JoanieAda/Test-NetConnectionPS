@@ -52,58 +52,58 @@ if ($path){
     $serverList=Import-Csv -Path $path -Delimiter ";" -ErrorAction Stop
     
     $serverList| ForEach-Object {
-        try{
-            if ($_.Ping -eq 'yes'){         
-                if (Test-NetConnection $_.IP -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
+        if ($_.Ping -eq 'yes'){         
+            if (Test-NetConnection $_.IP -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
     
-                    $string = ($_.IP + ' ping successful')
-                    $stringColor = 'Green'
-    
-                }
-                else{
-    
-                    $string = ($_.IP + ' ping failed')
-                    $stringColor = 'Red'
-    
-                }
-    
-                write-host -ForegroundColor $stringColor $string
-                if ($report){
-                    write-output $string | Out-File -Append $exportPath
-                }
-    
-            }
-            else{            
-            }
-    
-            if ($_.Port -gt '0'){
-                $tcpClient = New-Object System.Net.Sockets.TcpClient
-                $tcpConn = $tcpClient.BeginConnect($_.IP, $_.Port, $NULL, $NULL)
-                if ($tcpConn.AsyncWaitHandle.WaitOne($Timeout, $False)){
-    
-                    $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' established')
-                    $stringColor = 'Green'
-    
-                }
-                else{
-    
-                    $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' failed')
-                    $stringColor = 'Red'
-    
-                }
-    
-                write-host -ForegroundColor $stringColor $string
-                if ($report){
-                    write-output $string | Out-File -Append $exportPath
-                }
+                $string = ($_.IP + ' ping successful')
+                $stringColor = 'Green'
     
             }
             else{
+    
+                $string = ($_.IP + ' ping failed')
+                $stringColor = 'Red'
+    
+            }
+    
+            write-host -ForegroundColor $stringColor $string
+            if ($report){
+                write-output $string | Out-File -Append $exportPath
             }
     
         }
-        catch{
+        else{            
         }
+    
+        if ($_.Port -gt '0'){
+            $tcpClient = New-Object System.Net.Sockets.TcpClient
+            $tcpConn = $tcpClient.BeginConnect($_.IP, $_.Port, $NULL, $NULL)
+            if ($tcpConn.AsyncWaitHandle.WaitOne($timeout, $False)){
+
+                $tcpClient.EndConnect($tcpConn) | Out-Null    
+                $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' established')
+                $stringColor = 'Green'
+    
+            }
+            else{
+    
+                $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' failed')
+                $stringColor = 'Red'
+    
+            }
+
+            $tcpClient.Close()
+
+            write-host -ForegroundColor $stringColor $string
+            if ($report){
+                write-output $string | Out-File -Append $exportPath
+            }
+    
+        }
+        else{
+        }
+    
+
     }
 }
 else{
