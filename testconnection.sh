@@ -84,7 +84,7 @@ if [[ $serverList ]]; then
         fi
     
         if [ $port -gt 0 ]; then
-            nc -zw2 $ip $port
+            nc -zw1 $ip $port
             if [ $? == 0 ]; then
                 string=$ip' TCP connection to port '$port' established'
                 color=$green

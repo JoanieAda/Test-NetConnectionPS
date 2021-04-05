@@ -32,6 +32,8 @@ param (
 #Manually set variables
 #List of ntpservers to poll when the -ntp switch is set
 $ntpServers = @('132.246.11.238','132.246.11.227','192.168.1.11')
+#Timeout value for tcpClient
+$timeout = 1000
 
 
 #Generates report path and inserts a leading date line
@@ -75,7 +77,9 @@ if ($path){
             }
     
             if ($_.Port -gt '0'){
-                if (Test-NetConnection $_.IP -Port $_.Port -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
+                $tcpClient = New-Object System.Net.Sockets.TcpClient
+                $tcpConn = $tcpClient.BeginConnect($_.IP, $_.Port, $NULL, $NULL)
+                if ($tcpConn.AsyncWaitHandle.WaitOne($Timeout, $False)){
     
                     $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' established')
                     $stringColor = 'Green'
