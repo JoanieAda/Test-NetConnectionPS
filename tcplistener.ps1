@@ -33,7 +33,7 @@ else{
 #Generates report path and inserts a leading date line
 if ($report){
 
-    $exportPath = Join-Path $PSScriptRoot -ChildPath $('Report_tcplistener_' + (Get-Date).tostring('yyyy-MM-dd') + ".log") 
+    $exportPath = Join-Path $PSScriptRoot -ChildPath $('Report_tcplistener_' + $port + '_' + (Get-Date).tostring('yyyy-MM-dd') + ".log") 
     write-output ('------------' + (Get-Date) + '------------') | Out-File -Append $exportPath
 
 }
@@ -70,7 +70,7 @@ while($stopWatch.elapsed -lt $idleTimeout){
         write-host -ForegroundColor Yellow -NoNewLine 'Wait for additional connections? (y/n): '
         $answer = read-host
 
-        while (!$answer -OR ($answer -ne 'y' -AND $answer -ne 'yes' -AND $answer -ne 'n' -AND $answer -ne 'no')){
+        while (!$answer -OR ($answer -ne 'y' -AND $answer -ne 'Y' -AND $answer -ne 'n' -AND $answer -ne 'N')){
 
             write-host -ForegroundColor Yellow -NoNewLine 'Answer must be y/Y or n/N: '
             $answer = read-host

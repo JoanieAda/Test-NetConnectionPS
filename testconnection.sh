@@ -19,28 +19,28 @@ commentBlock
 
 
 while [ -n "$1" ]; do 
-	case "$1" in
+    case "$1" in
 
-	-path)
-		serverList="$2"
-		shift
-		;;
+    -path)
+        serverList="$2"
+        shift
+        ;;
 
-	-ntp) 
-		ntp=' ' 
-		;;
+    -ntp) 
+        ntp=' ' 
+        ;;
 
-	-report) 
-		report=' ' 
-		;;
+    -report) 
+        report=' ' 
+        ;;
 
-	*) 
-		echo "Option $1 not recognized" 
-		;;
+    *) 
+        echo "Option $1 not recognized" 
+        ;;
 
-	esac
+    esac
 
-	shift
+    shift
 
 done
 
@@ -56,71 +56,71 @@ noColor='\033[0m'
 
 #Generates report path and inserts a leading date line
 if [[ $report ]]; then
-	exportPath='Report_connection-test_'`date +"%Y-%m-%d"`'.log'
-	echo '------------'`date`'------------' >> $exportPath
-fi	
+    exportPath='Report_connection-test_'`date +"%Y-%m-%d"`'.log'
+    echo '------------'`date`'------------' >> $exportPath
+fi  
 
 
 #Check the reachability/TCP connection for the hosts in the CSV
 if [[ $serverList ]]; then
-	for i in `tail -n +2 $serverList`; do
-		ip=`printf $i | cut -f 1 -d ';'`
-		port=`printf $i | cut -f 2 -d ';'`
-		doPing=`printf $i | cut -f 3 -d ';'`
-	
-		if [ $doPing == 'yes' ]; then
-			ping -c 1 $ip &> /dev/null
-			if [ $? == 0 ]; then
-				string=$ip' ping successful'
-				color=$green
-			else
-				string=$ip' ping failed'
-				color=$red
-			fi
-			echo -e ${color}$string${noColor}
-			if [[ $report ]]; then
-				echo $string >> $exportPath
-			fi			
-		fi
-	
-		if [ $port -gt 0 ]; then
-			nc -z $ip $port
-			if [ $? == 0 ]; then
-				string=$ip' TCP connection to port '$port' established'
-				color=$green
-			else
-				string=$ip' TCP connection to port '$port' failed'
-				color=$red
-			fi
-			echo -e ${color}$string${noColor}
-			if [[ $report ]]; then
-				echo $string >> $exportPath
-			fi	
-		fi
-	done
+    for i in `tail -n +2 $serverList`; do
+        ip=`printf $i | cut -f 1 -d ';'`
+        port=`printf $i | cut -f 2 -d ';'`
+        doPing=`printf $i | cut -f 3 -d ';'`
+    
+        if [ $doPing == 'yes' ]; then
+            ping -c 1 $ip &> /dev/null
+            if [ $? == 0 ]; then
+                string=$ip' ping successful'
+                color=$green
+            else
+                string=$ip' ping failed'
+                color=$red
+            fi
+            echo -e ${color}$string${noColor}
+            if [[ $report ]]; then
+                echo $string >> $exportPath
+            fi          
+        fi
+    
+        if [ $port -gt 0 ]; then
+            nc -zw2 $ip $port
+            if [ $? == 0 ]; then
+                string=$ip' TCP connection to port '$port' established'
+                color=$green
+            else
+                string=$ip' TCP connection to port '$port' failed'
+                color=$red
+            fi
+            echo -e ${color}$string${noColor}
+            if [[ $report ]]; then
+                echo $string >> $exportPath
+            fi  
+        fi
+    done
 fi
 
 
 #Check NTP reachability to list of NTP servers
 if [[ $ntp ]]; then
-	for i in ${ntpServers[@]}; do
-#		if [[ $(printf "c%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then							#NTP client query using Version 4
-		if [[ $(printf "\x$(printf %x 27)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then			#NTP client query using Version 3	
-			string='NTP Server '$i' active'
-			color=$green
-		else
-			string='NTP Server '$i' failed'
-			color=$red
-		fi
-		echo -e ${color}$string${noColor}
-		if [[ $report ]]; then
-			echo $string >> $exportPath
-		fi	
-	done
+    for i in ${ntpServers[@]}; do
+#       if [[ $(printf "#%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then                          #NTP client query using Version 4
+        if [[ $(printf "\x$(printf %x 27)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 3   
+            string='NTP Server '$i' active'
+            color=$green
+        else
+            string='NTP Server '$i' failed'
+            color=$red
+        fi
+        echo -e ${color}$string${noColor}
+        if [[ $report ]]; then
+            echo $string >> $exportPath
+        fi  
+    done
 fi
 
 
 #Add new line at the end of the report
 if [[ $report ]]; then
-	printf '\n' >> $exportPath
-fi	
+    printf '\n' >> $exportPath
+fi  
