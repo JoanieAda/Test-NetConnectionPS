@@ -5,6 +5,7 @@ This script was built to perform some validation tests based on an csv host list
 -port is a mandatory value
 -report will save the output file dated of today (output is appended)
 -timeout will set the idle timeout value to X minutes (default: 5 minutes)
+-count will continue listening to the count value before prompting user
 
 Script will listen on the specified TCP port and will indicate if connections are established.
 
@@ -13,7 +14,8 @@ Script will listen on the specified TCP port and will indicate if connections ar
 param (
     [Parameter(Mandatory=$true)] [int] $port,
     [Parameter(Mandatory=$false)] [switch] $report,
-    [Parameter(Mandatory=$false)] [int] $timeout
+    [Parameter(Mandatory=$false)] [int] $timeout,
+    [Parameter(Mandatory=$false)] [int] $count
 );
 
 
@@ -67,25 +69,34 @@ while($stopWatch.elapsed -lt $idleTimeout){
             write-output $string | Out-File -Append $exportPath
         }
 
-        write-host -ForegroundColor Yellow -NoNewLine 'Wait for additional connections? (y/n): '
-        $answer = read-host
+        if ($count -gt 1) {
 
-        while (!$answer -OR ($answer -ne 'y' -AND $answer -ne 'Y' -AND $answer -ne 'n' -AND $answer -ne 'N')){
+            $count--
+            continue
 
-            write-host -ForegroundColor Yellow -NoNewLine 'Answer must be y/Y or n/N: '
+        }
+        else {
+
+            write-host -ForegroundColor Yellow -NoNewLine 'Wait for additional connections? (y/n): '
             $answer = read-host
-
-        }
-
-        if ($answer -eq "n" -or $answer -eq "N"){
-
-            break
-
-        }
-        else{
-
-            $stopWatch.Restart()
-
+    
+            while (!$answer -OR ($answer -ne 'y' -AND $answer -ne 'Y' -AND $answer -ne 'n' -AND $answer -ne 'N')){
+    
+                write-host -ForegroundColor Yellow -NoNewLine 'Answer must be y/Y or n/N: '
+                $answer = read-host
+    
+            }
+    
+            if ($answer -eq "n" -or $answer -eq "N"){
+    
+                break
+    
+            }
+            else{
+    
+                $stopWatch.Restart()
+    
+            }
         }
         $client.Close()
 

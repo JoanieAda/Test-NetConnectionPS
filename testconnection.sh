@@ -8,8 +8,8 @@ This script was built to perform some validation tests based on a csv host list.
 -report will save the output file dated of today (output is appended)
 
 CSV file format
-IP;Port;Ping
-serverip;80;yes
+Name;IP;Port;Ping
+systemname;serverip;80;yes
 
 Set Port to '0' to prevent TCP test
 Set Ping to 'no' to prevent Ping test
@@ -64,17 +64,18 @@ fi
 #Check the reachability/TCP connection for the hosts in the CSV
 if [[ $serverList ]]; then
     for i in `tail -n +2 $serverList`; do
-        ip=`printf $i | cut -f 1 -d ';'`
-        port=`printf $i | cut -f 2 -d ';'`
-        doPing=`printf $i | cut -f 3 -d ';'`
-    
+        name=`printf $i | cut -f 1 -d ';'`
+        ip=`printf $i | cut -f 2 -d ';'`
+        port=`printf $i | cut -f 3 -d ';'`
+        doPing=`printf $i | cut -f 4 -d ';' | tr -d '\r'`
+
         if [ $doPing == 'yes' ]; then
-            ping -c 1 $ip &> /dev/null
+            ping -c 1 -W 1 $ip &> /dev/null
             if [ $? == 0 ]; then
-                string=$ip' ping successful'
+                string=$name' '$ip' ping successful'
                 color=$green
             else
-                string=$ip' ping failed'
+                string=$name' '$ip' ping failed'
                 color=$red
             fi
             echo -e ${color}$string${noColor}
@@ -86,10 +87,10 @@ if [[ $serverList ]]; then
         if [ $port -gt 0 ]; then
             nc -zw1 $ip $port
             if [ $? == 0 ]; then
-                string=$ip' TCP connection to port '$port' established'
+                string=$name' '$ip' TCP connection to port '$port' established'
                 color=$green
             else
-                string=$ip' TCP connection to port '$port' failed'
+                string=$name' '$ip' TCP connection to port '$port' failed'
                 color=$red
             fi
             echo -e ${color}$string${noColor}
@@ -101,11 +102,13 @@ if [[ $serverList ]]; then
 fi
 
 
-#Check NTP reachability to list of NTP servers
+#Check NTP reachability to list of NTP servers (only one of the versions should be uncommented)
 if [[ $ntp ]]; then
     for i in ${ntpServers[@]}; do
-#       if [[ $(printf "#%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then                          #NTP client query using Version 4
-        if [[ $(printf "\x$(printf %x 27)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 3   
+        if [[ $(printf "\x$(printf %x 11)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 1
+#        if [[ $(printf "\x$(printf %x 19)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 2          
+#        if [[ $(printf "\x$(printf %x 27)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 3  
+#        if [[ $(printf "\x$(printf %x 35)%47s" | nc -uw1 $i 123 | tr -d '\0') ]]; then          #NTP client query using Version 4
             string='NTP Server '$i' active'
             color=$green
         else

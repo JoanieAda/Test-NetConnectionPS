@@ -3,9 +3,10 @@
 tcplistener.sh [-port <port num>] [-report] [-timeout <idle timeout in minutes>]
 
 This script was built to perform some validation tests based on an csv host list.
--port port number to listen on, if ommited default value of 5000 will be used
+-port port number to listen on, if omited default value of 5000 will be used
 -report will save the output file dated of today (output is appended)
 -timeout will set the idle timeout value to X minutes (default: 5 minutes)
+-count will continue listening to the count value before prompting user
 
 Script will listen on the specified TCP port and will indicate if connections are established.
 commentBlock
@@ -26,6 +27,11 @@ while [ -n "$1" ]; do
 
     -report) 
         report=' ' 
+        ;;
+
+    -count) 
+        count="$2" 
+        shift
         ;;
 
     *) 
@@ -61,6 +67,9 @@ if [[ -z $port ]]; then
     port=5000
 fi  
 
+if [[ -z $count ]]; then
+    count=0
+fi  
 
 #Generates report path and inserts a leading date line
 if [[ $report ]]; then
@@ -77,7 +86,7 @@ if [[ $report ]]; then
     echo $string >> $exportPath
 fi
 
-##Listen to oncoming conenctions, prompt user if script should continue listening
+##Listen to oncoming connections, prompt user if script should continue listening
 while [ True ]; do
     netConn=$(timeout $idleTimeout's' nc -lvn4 -p $port 2>&1)
     if [ $? == 0 ]; then
@@ -94,15 +103,20 @@ while [ True ]; do
         break      
     fi
 
-    printf "${yellow}Wait for additional connections? (y/n): ${nocolor}"
-    read answer
-    while [[ $answer != 'y' && $answer != 'Y' && $answer != 'n' && $answer != 'N' ]]; do
-        printf "${yellow}Answer must be y/Y or n/N: ${nocolor}"
+    if [ $count -gt 1 ]; then
+        ((count-=1))
+        continue
+    else
+        printf "${yellow}Wait for additional connections? (y/n): ${nocolor}"
         read answer
-    done
-
-    if [[ $answer == 'n' || $answer == 'N' ]]; then
-        break
+        while [[ $answer != 'y' && $answer != 'Y' && $answer != 'n' && $answer != 'N' ]]; do
+            printf "${yellow}Answer must be y/Y or n/N: ${nocolor}"
+            read answer
+        done
+    
+        if [[ $answer == 'n' || $answer == 'N' ]]; then
+            break
+        fi
     fi
 
 done  

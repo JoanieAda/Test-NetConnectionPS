@@ -7,8 +7,8 @@ This script was built to perform some validation tests based on a csv host list.
 -report will save the output file dated of today (output is appended)
 
 CSV file format
-IP;Port;Ping
-serverip;80;yes
+Name;IP;Port;Ping
+systemname;serverip;80;yes
 
 Set Port to '0' to prevent TCP test
 Set Ping to 'no' to prevent Ping test
@@ -20,7 +20,6 @@ IP can also be an fqdn as long as the host can perform proper name resolution
 param (
     [Parameter(Mandatory=$false)] [switch] $ntp,
     [Parameter(Mandatory=$false)] [switch] $report,
-
     [Parameter(Mandatory=$false)]
     [ValidateScript({ 
         Test-Path $_ -PathType Leaf 
@@ -31,7 +30,7 @@ param (
 
 #Manually set variables
 #List of ntpservers to poll when the -ntp switch is set
-$ntpServers = @('132.246.11.238','132.246.11.227','192.168.1.11')
+$ntpServers = @('132.246.11.238','132.246.11.227','192.168.2.11')
 #Timeout value for tcpClient
 $timeout = 1000
 
@@ -55,17 +54,17 @@ if ($path){
         if ($_.Ping -eq 'yes'){         
             if (Test-NetConnection $_.IP -InformationLevel Quiet -ErrorAction Stop -WarningAction SilentlyContinue){
     
-                $string = ($_.IP + ' ping successful')
+                $string = ($_.Name + ' ' + $_.IP + ' ping successful')
                 $stringColor = 'Green'
     
             }
             else{
     
-                $string = ($_.IP + ' ping failed')
+                $string = ($_.Name + ' ' + $_.IP + ' ping failed')
                 $stringColor = 'Red'
     
             }
-    
+
             write-host -ForegroundColor $stringColor $string
             if ($report){
                 write-output $string | Out-File -Append $exportPath
@@ -81,13 +80,13 @@ if ($path){
             if ($tcpConn.AsyncWaitHandle.WaitOne($timeout, $False)){
 
                 $tcpClient.EndConnect($tcpConn) | Out-Null    
-                $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' established')
+                $string = ($_.Name + ' ' + $_.IP + ' TCP connection to port ' + $_.Port + ' established')
                 $stringColor = 'Green'
     
             }
             else{
     
-                $string = ($_.IP + ' TCP connection to port ' + $_.Port + ' failed')
+                $string = ($_.Name + ' ' + $_.IP + ' TCP connection to port ' + $_.Port + ' failed')
                 $stringColor = 'Red'
     
             }
